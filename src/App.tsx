@@ -11,7 +11,7 @@ function WallArt({ position, rotation, onPositionChange, onRotationChange }: {
   onRotationChange: (rot: { x: number; y: number; z: number }) => void;
 }) {
   const meshRef = useRef<any>(null);
-  const { gl, camera, invalidate } = useThree();
+  const { gl, camera, scene, invalidate } = useThree();
   const { session } = useXR();
 
   useEffect(() => {
@@ -26,7 +26,7 @@ function WallArt({ position, rotation, onPositionChange, onRotationChange }: {
       meshRef.current.updateMatrixWorld();
       meshRef.current.geometry.needsUpdate = true;
       meshRef.current.material.needsUpdate = true;
-      gl.renderLists.dispose();
+      gl.render(scene, camera); // Manual render
       invalidate();
       console.log(
         'WallArt Frame Update - Position:',
@@ -274,7 +274,7 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
                 Reset
               </button>
               <button
-                className="mt-2 w-full py-2 bg-green-500 hover:bg-blue-600 rounded"
+                className="mt-2 w-full py-2 bg-green-500 hover:bg-green-600 rounded"
                 onClick={() => {
                   const newPosition = { ...localPosition, x: localPosition.x + 0.1 };
                   setLocalPosition(newPosition);
