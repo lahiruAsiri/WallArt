@@ -45,8 +45,13 @@ export function PlacementReticle({ onPlace }: PlacementReticleProps) {
           }
         })
         .then((source) => {
-          setHitTestSource(source ?? null)
-          console.log("Hit test source initialized successfully")
+          // Additional null check for the returned source
+          if (source) {
+            setHitTestSource(source)
+            console.log("Hit test source initialized successfully")
+          } else {
+            throw new Error("Hit test source returned null")
+          }
         })
         .catch((err) => {
           console.warn("Hit test initialization failed:", err)
