@@ -16,8 +16,9 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
   const height = width / aspect;
 
   const handleSelectStart = (event: any) => {
+    console.log('Select Start:', event.controller); // Debug controller
     setIsDragging(true);
-    if (event.controller && event.controller.position) {
+    if (event.controller?.position) {
       lastControllerPos.current = {
         x: event.controller.position.x,
         y: event.controller.position.y,
@@ -27,11 +28,13 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
   };
 
   const handleSelectEnd = () => {
+    console.log('Select End'); // Debug
     setIsDragging(false);
   };
 
   const handleMove = (event: any) => {
-    if (isDragging && event.controller && event.controller.position) {
+    if (isDragging && event.controller?.position) {
+      console.log('Controller Move:', event.controller.position); // Debug
       const controllerPos = event.controller.position;
       const delta = {
         x: controllerPos.x - lastControllerPos.current.x,
@@ -58,8 +61,14 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
         y: controllerPos.y,
         z: controllerPos.z
       };
+    } else if (isDragging) {
+      console.warn('No controller position data'); // Debug fallback
     }
   };
+
+  useEffect(() => {
+    console.log('WallArt Updated - Position:', position, 'Rotation:', rotation); // Debug
+  }, [position, rotation]);
 
   return (
     <Interactive
@@ -88,13 +97,13 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: number) => {
     const newPosition = { ...position, [axis]: value };
-    console.log('Slider Position Update:', newPosition); // Debug log
+    console.log('Slider Position Update:', newPosition); // Debug
     onPositionChange(newPosition);
   };
 
   const handleRotationChange = (axis: 'x' | 'y' | 'z', value: number) => {
     const newRotation = { ...rotation, [axis]: (value * Math.PI) / 180 };
-    console.log('Slider Rotation Update:', newRotation); // Debug log
+    console.log('Slider Rotation Update:', newRotation); // Debug
     onRotationChange(newRotation);
   };
 
@@ -126,7 +135,7 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
                 min="-2"
                 max="2"
                 step="0.1"
-                value={position.x}
+                defaultValue={position.x}
                 onChange={(e) => handlePositionChange('x', parseFloat(e.target.value))}
                 className="w-full"
               />
@@ -138,7 +147,7 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
                 min="-2"
                 max="2"
                 step="0.1"
-                value={position.y}
+                defaultValue={position.y}
                 onChange={(e) => handlePositionChange('y', parseFloat(e.target.value))}
                 className="w-full"
               />
@@ -150,7 +159,7 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
                 min="-2"
                 max="2"
                 step="0.1"
-                value={position.z}
+                defaultValue={position.z}
                 onChange={(e) => handlePositionChange('z', parseFloat(e.target.value))}
                 className="w-full"
               />
@@ -162,7 +171,7 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
                 min="-180"
                 max="180"
                 step="1"
-                value={(rotation.x * 180) / Math.PI}
+                defaultValue={(rotation.x * 180) / Math.PI}
                 onChange={(e) => handleRotationChange('x', parseFloat(e.target.value))}
                 className="w-full"
               />
@@ -174,7 +183,7 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
                 min="-180"
                 max="180"
                 step="1"
-                value={(rotation.y * 180) / Math.PI}
+                defaultValue={(rotation.y * 180) / Math.PI}
                 onChange={(e) => handleRotationChange('y', parseFloat(e.target.value))}
                 className="w-full"
               />
@@ -186,11 +195,21 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
                 min="-180"
                 max="180"
                 step="1"
-                value={(rotation.z * 180) / Math.PI}
+                defaultValue={(rotation.z * 180) / Math.PI}
                 onChange={(e) => handleRotationChange('z', parseFloat(e.target.value))}
                 className="w-full"
               />
             </div>
+            <button
+              className="mt-2 w-full py-2 bg-gray-500 hover:bg-gray-600 rounded"
+              onClick={() => {
+                onPositionChange({ x: 0, y: 0.5, z: -0.5 });
+                onRotationChange({ x: 0, y: 0, z: 0 });
+                console.log('Reset Position and Rotation');
+              }}
+            >
+              Reset
+            </button>
           </div>
         </>
       )}
@@ -203,7 +222,7 @@ export function App() {
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
 
   useEffect(() => {
-    console.log('App State Updated - Position:', position, 'Rotation:', rotation);
+    console.log('App State Updated - Position:', position, 'Rotation:', rotation); // Debug
   }, [position, rotation]);
 
   return (
@@ -214,12 +233,11 @@ export function App() {
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
           <WallArt
-            key={`${position.x}-${position.y}-${position.z}-${rotation.x}-${rotation.y}-${rotation.z}`}
             position={position}
             rotation={rotation}
             imageUrl="/wall-art.png"
-            onPositionChange={setPosition}
-            onRotationChange={setRotation}
+            onPositionChange={(newPos: { x: number; y: number; z: number }) => setPosition({ ...newPos })}
+            onRotationChange={(newRot: { x: number; y: number; z: number }) => setRotation({ ...newRot })}
           />
           <Controllers />
         </XR>
@@ -227,8 +245,8 @@ export function App() {
       <ControlPanel
         position={position}
         rotation={rotation}
-        onPositionChange={setPosition}
-        onRotationChange={setRotation}
+        onPositionChange={(newPos: { x: number; y: number; z: number }) => setPosition({ ...newPos })}
+        onRotationChange={(newRot: { x: number; y: number; z: number }) => setRotation({ ...newRot })}
       />
     </>
   );
