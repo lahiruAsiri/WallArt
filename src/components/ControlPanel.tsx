@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-
 import { useRef } from "react"
 import { useWallArt } from "../context/WallArtContext"
+import { ARInstructions } from "./ARInstructions"
 
 export function ControlPanel() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -32,14 +32,13 @@ export function ControlPanel() {
 
   if (!wallArtPlaced) {
     return (
-      <div className="control-panel">
-        <div className="instruction-panel">
-          <h3>🎯 AR Instructions</h3>
-          <p>1. Tap "Enter AR" to start</p>
-          <p>2. Point camera at a flat surface</p>
-          <p>3. Tap the blue circle to place art</p>
+      <>
+        <ARInstructions />
+        <div className="status-indicator">
+          <div className="status-dot"></div>
+          <span>Looking for surfaces...</span>
         </div>
-      </div>
+      </>
     )
   }
 

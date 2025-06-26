@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber"
 import { WallArt } from "./components/WallArt"
 import { ControlPanel } from "./components/ControlPanel"
 import { PlacementReticle } from "./components/PlacementReticle"
+import { DebugPanel } from "./components/DebugPanel"
 import { WallArtProvider, useWallArt } from "./context/WallArtContext"
 import "./styles.css"
 
@@ -59,6 +60,7 @@ export function App() {
         </Canvas>
 
         <ControlPanel />
+        <DebugPanel />
       </div>
     </WallArtProvider>
   )
