@@ -347,7 +347,7 @@ export function App() {
           requiredFeatures: ['local'],
           optionalFeatures: ['local-floor', 'hit-test']
         }}
-        onError={(err) => console.warn('AR Session Error:', err.message)}
+        onError={(err) => console.warn('AR Session Error:', err.toString())}
       />
       <Canvas
         gl={{ antialias: true }}
