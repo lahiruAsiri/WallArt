@@ -134,7 +134,7 @@ export function App() {
           <WallArt
             position={position}
             rotation={rotation}
-            imageUrl="/wall-art.png"
+            imageUrl="/wall-art1.png"
             onPositionChange={(newPos: { x: number; y: number; z: number }) => setPosition({ ...newPos })}
             onRotationChange={(newRot: { x: number; y: number; z: number }) => setRotation({ ...newRot })}
           />
