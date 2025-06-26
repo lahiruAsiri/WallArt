@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Interactive, XR, ARButton, Controllers } from '@react-three/xr';
 import { useTexture } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
@@ -39,23 +39,20 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
         z: controllerPos.z - lastControllerPos.current.z
       };
 
-      // Update position based on controller movement
       const newPosition = {
-        x: position.x + delta.x * 0.5, // Scale movement for smoother control
+        x: position.x + delta.x * 0.5,
         y: position.y + delta.y * 0.5,
         z: position.z + delta.z * 0.5
       };
       onPositionChange(newPosition);
 
-      // Update rotation based on controller movement (simplified)
       const newRotation = {
-        x: rotation.x + delta.y * 0.5, // Rotate based on vertical movement
-        y: rotation.y + delta.x * 0.5, // Rotate based on horizontal movement
+        x: rotation.x + delta.y * 0.5,
+        y: rotation.y + delta.x * 0.5,
         z: rotation.z
       };
       onRotationChange(newRotation);
 
-      // Update last position
       lastControllerPos.current = {
         x: controllerPos.x,
         y: controllerPos.y,
@@ -91,13 +88,13 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: number) => {
     const newPosition = { ...position, [axis]: value };
-    console.log('New Position:', newPosition); // Debug log
+    console.log('Slider Position Update:', newPosition); // Debug log
     onPositionChange(newPosition);
   };
 
   const handleRotationChange = (axis: 'x' | 'y' | 'z', value: number) => {
     const newRotation = { ...rotation, [axis]: (value * Math.PI) / 180 };
-    console.log('New Rotation:', newRotation); // Debug log
+    console.log('Slider Rotation Update:', newRotation); // Debug log
     onRotationChange(newRotation);
   };
 
@@ -205,6 +202,10 @@ export function App() {
   const [position, setPosition] = useState({ x: 0, y: 0.5, z: -0.5 });
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
 
+  useEffect(() => {
+    console.log('App State Updated - Position:', position, 'Rotation:', rotation);
+  }, [position, rotation]);
+
   return (
     <>
       <ARButton />
@@ -213,6 +214,7 @@ export function App() {
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
           <WallArt
+            key={`${position.x}-${position.y}-${position.z}-${rotation.x}-${rotation.y}-${rotation.z}`}
             position={position}
             rotation={rotation}
             imageUrl="/wall-art.png"
