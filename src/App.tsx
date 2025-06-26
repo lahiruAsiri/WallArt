@@ -117,7 +117,7 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
 }
 
 export function App() {
-  const [position, setPosition] = useState({ x: 0, y: 0.5, z: -2.5 })
+  const [position, setPosition] = useState({ x: 0, y: 1, z: -2.5 })
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 })
 
   useEffect(() => {
