@@ -1,6 +1,7 @@
 body {
   margin: 0;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
 }
 
 canvas {
@@ -9,20 +10,279 @@ canvas {
   display: block;
 }
 
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #f3f4f6;
+}
+
+/* Instructions Panel */
+.instructions-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.instructions-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
+  max-width: 400px;
+}
+
+.instructions-card h2 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.instructions-text {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.instructions-list {
+  margin: 0;
+}
+
+.instructions-list p {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* AR Button Styling */
 button[data-xr-ui] {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 10px 20px;
-  background-color: #000;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  padding: 12px 24px !important;
+  background-color: #3b82f6 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  z-index: 10 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  transition: background-color 0.2s !important;
 }
 
 button[data-xr-ui]:hover {
-  background-color: #333;
+  background-color: #2563eb !important;
+}
+
+/* AR Messages */
+.ar-message {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 250px;
+}
+
+.message-text {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.place-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.place-button {
+  background-color: #3b82f6 !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+}
+
+.place-button:hover {
+  background-color: #2563eb !important;
+}
+
+/* Control Panel */
+.control-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  max-width: 90vw;
+}
+
+.control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.control-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.close-btn {
+  padding: 4px 8px !important;
+  font-size: 16px !important;
+  min-width: auto !important;
+}
+
+.control-section {
+  margin-bottom: 16px;
+}
+
+.control-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+/* Slider Styling */
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.slider-label {
+  font-size: 12px;
+  color: #6b7280;
+  min-width: 24px;
+}
+
+.slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.scale-display {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Position Controls */
+.position-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pos-btn {
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+}
+
+/* Rotation Controls */
+.rotation-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.rot-btn {
+  flex: 1;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+}
+
+/* Button Base Styles */
+button {
+  font-family: inherit;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .instructions-panel {
+    left: 10px;
+    right: 10px;
+    top: 10px;
+  }
+
+  .instructions-card {
+    padding: 16px;
+  }
+
+  .control-panel {
+    width: 280px;
+    padding: 16px;
+  }
+
+  .position-grid {
+    grid-template-columns: 1fr;
+  }
 }
