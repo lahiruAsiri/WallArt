@@ -285,7 +285,7 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
   );
 }
 
-export default function App() {
+export  function App() {
   const [position, setPosition] = useState({ x: 0, y: 1.5, z: -1 });
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
 
