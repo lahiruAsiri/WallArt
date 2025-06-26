@@ -1,51 +1,77 @@
-import React, { Suspense, useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Interactive, XR, ARButton, Controllers } from '@react-three/xr';
 import { useTexture } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import './styles.css';
 
-function WallArt({ position, rotation, imageUrl, ...rest }: any) {
+function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationChange, ...rest }: any) {
   const [hover, setHover] = useState(false);
-  const [color, setColor] = useState('white');
+  const [isDragging, setIsDragging] = useState(false);
   const texture = useTexture(imageUrl);
-
-  const onSelect = () => {
-    setColor(`#${Math.floor(Math.random() * 16777215).toString(16)}`);
-  };
+  const meshRef = useRef();
 
   const aspect = texture.image ? texture.image.width / texture.image.height : 1;
   const width = 1;
   const height = width / aspect;
 
+  const handleSelectStart = (event: any) => {
+    setIsDragging(true);
+  };
+
+  const handleSelectEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleMove = (event: any) => {
+    if (isDragging && event.intersection) {
+      const { point } = event.intersection;
+      // Update position to follow controller's intersection point
+      onPositionChange({ x: point.x, y: point.y, z: point.z });
+      // Optional: Adjust rotation based on controller movement (simplified example)
+      const controller = event.controller;
+      if (controller) {
+        const deltaRotation = {
+          x: (controller.position.y * 0.1) % (Math.PI * 2), // Rotate based on controller Y
+          y: (controller.position.x * 0.1) % (Math.PI * 2), // Rotate based on controller X
+          z: 0
+        };
+        onRotationChange(deltaRotation);
+      }
+    }
+  };
+
   return (
-    <Interactive onHover={() => setHover(true)} onBlur={() => setHover(false)} onSelect={onSelect}>
+    <Interactive
+      onHover={() => setHover(true)}
+      onBlur={() => setHover(false)}
+      onSelectStart={handleSelectStart}
+      onSelectEnd={handleSelectEnd}
+      onMove={handleMove}
+    >
       <mesh
+        ref={meshRef}
         scale={hover ? [1.1, 1.1, 1.1] : [1, 1, 1]}
         position={[position.x, position.y, position.z]}
         rotation={[rotation.x, rotation.y, rotation.z]}
         {...rest}
       >
         <planeGeometry args={[width, height]} />
-        <meshStandardMaterial map={texture} color={color} transparent={true} />
+        <meshStandardMaterial map={texture} transparent={true} />
       </mesh>
     </Interactive>
   );
 }
 
-function ControlPanel({ onPositionChange, onRotationChange }: any) {
+function ControlPanel({ position, rotation, onPositionChange, onRotationChange }: any) {
   const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0.5, z: -0.5 });
-  const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: number) => {
     const newPosition = { ...position, [axis]: value };
-    setPosition(newPosition);
     onPositionChange(newPosition);
   };
 
   const handleRotationChange = (axis: 'x' | 'y' | 'z', value: number) => {
     const newRotation = { ...rotation, [axis]: (value * Math.PI) / 180 }; // Convert degrees to radians
-    setRotation(newRotation);
     onRotationChange(newRotation);
   };
 
@@ -160,11 +186,22 @@ export function App() {
         <XR referenceSpace="local">
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
-          <WallArt position={position} rotation={rotation} imageUrl="/wall-art.png" />
+          <WallArt
+            position={position}
+            rotation={rotation}
+            imageUrl="/wall-art.png"
+            onPositionChange={setPosition}
+            onRotationChange={setRotation}
+          />
           <Controllers />
         </XR>
       </Canvas>
-      <ControlPanel onPositionChange={setPosition} onRotationChange={setRotation} />
+      <ControlPanel
+        position={position}
+        rotation={rotation}
+        onPositionChange={setPosition}
+        onRotationChange={setRotation}
+      />
     </>
   );
 }
