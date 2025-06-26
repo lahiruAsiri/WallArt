@@ -8,7 +8,8 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
   const [hover, setHover] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const texture = useTexture(imageUrl);
-  const meshRef = useRef();
+  const meshRef = useRef<any>(null);
+  const lastControllerPos = useRef({ x: 0, y: 0, z: 0 });
 
   const aspect = texture.image ? texture.image.width / texture.image.height : 1;
   const width = 1;
@@ -16,6 +17,13 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
 
   const handleSelectStart = (event: any) => {
     setIsDragging(true);
+    if (event.controller && event.controller.position) {
+      lastControllerPos.current = {
+        x: event.controller.position.x,
+        y: event.controller.position.y,
+        z: event.controller.position.z
+      };
+    }
   };
 
   const handleSelectEnd = () => {
@@ -23,20 +31,36 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
   };
 
   const handleMove = (event: any) => {
-    if (isDragging && event.intersection) {
-      const { point } = event.intersection;
-      // Update position to follow controller's intersection point
-      onPositionChange({ x: point.x, y: point.y, z: point.z });
-      // Optional: Adjust rotation based on controller movement (simplified example)
-      const controller = event.controller;
-      if (controller) {
-        const deltaRotation = {
-          x: (controller.position.y * 0.1) % (Math.PI * 2), // Rotate based on controller Y
-          y: (controller.position.x * 0.1) % (Math.PI * 2), // Rotate based on controller X
-          z: 0
-        };
-        onRotationChange(deltaRotation);
-      }
+    if (isDragging && event.controller && event.controller.position) {
+      const controllerPos = event.controller.position;
+      const delta = {
+        x: controllerPos.x - lastControllerPos.current.x,
+        y: controllerPos.y - lastControllerPos.current.y,
+        z: controllerPos.z - lastControllerPos.current.z
+      };
+
+      // Update position based on controller movement
+      const newPosition = {
+        x: position.x + delta.x * 0.5, // Scale movement for smoother control
+        y: position.y + delta.y * 0.5,
+        z: position.z + delta.z * 0.5
+      };
+      onPositionChange(newPosition);
+
+      // Update rotation based on controller movement (simplified)
+      const newRotation = {
+        x: rotation.x + delta.y * 0.5, // Rotate based on vertical movement
+        y: rotation.y + delta.x * 0.5, // Rotate based on horizontal movement
+        z: rotation.z
+      };
+      onRotationChange(newRotation);
+
+      // Update last position
+      lastControllerPos.current = {
+        x: controllerPos.x,
+        y: controllerPos.y,
+        z: controllerPos.z
+      };
     }
   };
 
@@ -67,11 +91,13 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: number) => {
     const newPosition = { ...position, [axis]: value };
+    console.log('New Position:', newPosition); // Debug log
     onPositionChange(newPosition);
   };
 
   const handleRotationChange = (axis: 'x' | 'y' | 'z', value: number) => {
-    const newRotation = { ...rotation, [axis]: (value * Math.PI) / 180 }; // Convert degrees to radians
+    const newRotation = { ...rotation, [axis]: (value * Math.PI) / 180 };
+    console.log('New Rotation:', newRotation); // Debug log
     onRotationChange(newRotation);
   };
 
