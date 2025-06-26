@@ -134,7 +134,7 @@ export function App() {
           <WallArt
             position={position}
             rotation={rotation}
-            imageUrl="/wall-art1.png"
+            imageUrl="https://cdn.leonardo.ai/users/56148a3e-5d5e-4c3d-8a5d-9389c7a5de4a/generations/efd07756-665c-42c1-8a60-abc8da9de305/Leonardo_Lightning_XL_Dreamy_Horizons_2.jpg"
             onPositionChange={(newPos: { x: number; y: number; z: number }) => setPosition({ ...newPos })}
             onRotationChange={(newRot: { x: number; y: number; z: number }) => setRotation({ ...newRot })}
           />
