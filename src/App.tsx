@@ -1,78 +1,52 @@
-import { Suspense } from "react"
-import { XR, ARButton, Controllers } from "@react-three/xr"
-import { Html } from "@react-three/drei"
-import { Canvas } from "@react-three/fiber"
-import { WallArt } from "./components/WallArt"
-import { ControlPanel } from "./components/ControlPanel"
-import { PlacementReticle } from "./components/PlacementReticle"
-import { DebugPanel } from "./components/DebugPanel"
-import { WallArtProvider, useWallArt } from "./context/WallArtContext"
-import "./styles.css"
+import React, { Suspense, useState } from 'react'
+import { Interactive, XR, ARButton, Controllers } from '@react-three/xr'
+import { Text } from '@react-three/drei'
+import './styles.css'
+import { Canvas } from '@react-three/fiber'
 
-function ARScene() {
-  const { wallArtPlaced, wallArtPosition, setWallArtPosition, setWallArtPlaced } = useWallArt()
+function Box({ color, size, scale, children, ...rest }: any) {
+  return (
+    <mesh scale={scale} {...rest}>
+      <boxBufferGeometry args={size} />
+      <meshPhongMaterial color={color} />
+      {children}
+    </mesh>
+  )
+}
 
-  const handlePlacement = (position: [number, number, number]) => {
-    setWallArtPosition(position)
-    setWallArtPlaced(true)
+function Button(props: any) {
+  const [hover, setHover] = useState(false)
+  const [color, setColor] = useState<any>('blue')
+
+  const onSelect = () => {
+    setColor((Math.random() * 0xffffff) | 0)
   }
 
   return (
-    <>
-      <ambientLight intensity={0.6} />
-      <directionalLight
-        position={[2, 4, 2]}
-        intensity={0.8}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-      />
-      <pointLight position={[0, 2, 1]} intensity={0.5} />
-
-      {!wallArtPlaced && <PlacementReticle onPlace={handlePlacement} />}
-
-      {wallArtPlaced && <WallArt position={wallArtPosition} />}
-
-      <Controllers />
-    </>
+    <Interactive onHover={() => setHover(true)} onBlur={() => setHover(false)} onSelect={onSelect}>
+      <Box color={color} scale={hover ? [0.6, 0.6, 0.6] : [0.5, 0.5, 0.5]} size={[0.4, 0.1, 0.1]} {...props}>
+        <Suspense fallback={null}>
+          <Text position={[0, 0, 0.06]} fontSize={0.05} color="#000" anchorX="center" anchorY="middle">
+            Hello react-xr!
+          </Text>
+        </Suspense>
+      </Box>
+    </Interactive>
   )
 }
 
 export function App() {
   return (
-    <WallArtProvider>
-      <div className="app-container">
-        <ARButton
-          className="ar-button"
-          sessionInit={{
-            requiredFeatures: ["hit-test"],
-            optionalFeatures: ["dom-overlay"],
-            domOverlay: { root: document.body },
-          }}
-        />
-
-        <Canvas camera={{ position: [0, 1.6, 3], fov: 70 }} gl={{ antialias: true, alpha: true }} shadows>
-          <XR referenceSpace="local">
-            <Suspense fallback={<LoadingFallback />}>
-              <ARScene />
-            </Suspense>
-          </XR>
-        </Canvas>
-
-        <ControlPanel />
-        <DebugPanel />
-      </div>
-    </WallArtProvider>
-  )
-}
-
-function LoadingFallback() {
-  return (
-    <Html center>
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading AR Experience...</p>
-      </div>
-    </Html>
+    <>
+      <ARButton />
+      <Canvas>
+        <XR referenceSpace="local">
+          <ambientLight />
+          <pointLight position={[10, 10, 10]} />
+          <Button position={[0, 0.1, -0.2]} />
+          <Controllers />
+        </XR>
+      </Canvas>
+    </>
   )
 }
