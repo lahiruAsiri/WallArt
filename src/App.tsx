@@ -181,13 +181,13 @@ export function App() {
         <XR referenceSpace="local">
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
-
+  
           <HitTestHandler isPlaced={isPlaced} setPlacementPose={setPlacementPose} />
-
+  
           {!isPlaced && placementPose && (
             <PlacementIndicator matrix={placementPose} />
           )}
-
+  
           <Interactive
             onSelect={() => {
               if (!isPlaced && placementPose) {
@@ -214,11 +214,11 @@ export function App() {
               />
             )}
           </Interactive>
-
+  
           <Controllers />
         </XR>
       </Canvas>
-
+  
       {isPlaced && (
         <ControlPanel
           position={position}
@@ -229,6 +229,13 @@ export function App() {
           onScaleChange={setScale}
         />
       )}
+  
+      {/* NEW MESSAGE */}
+      {!isPlaced && placementPose && (
+        <div className="ar-instruction">
+          Wall detected! Tap to place your art.
+        </div>
+      )}
     </>
   )
-}
+}  
