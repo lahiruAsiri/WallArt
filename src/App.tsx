@@ -11,7 +11,7 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
   const [hover, setHover] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [isPinching, setIsPinching] = useState(false)
-  const [scale, setScale] = useState(1)
+  const [scale, setScale] = useState(1) // Add scale state for zooming
   const texture = useTexture(imageUrl) as THREE.Texture
   const meshRef = useRef<any>(null)
   const lastControllerPos = useRef({ x: 0, y: 0, z: 0 })
@@ -20,8 +20,10 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
   const aspect = texture.image ? texture.image.width / texture.image.height : 1
   const width = 1
   const height = width / aspect
+  const frameThickness = 0.1
   const frameScale = 1.1
 
+  // Handle drag start
   const handleSelectStart = (event: any) => {
     console.log("Select Start:", event.controller)
     setIsDragging(true)
@@ -34,44 +36,15 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
     }
   }
 
+  // Handle drag end
   const handleSelectEnd = () => {
     console.log("Select End")
     setIsDragging(false)
   }
 
-  const handleSqueezeStart = (event: any) => {
-    console.log("Squeeze Start:", event.controllers)
-    if (event.controllers?.length === 2) {
-      setIsPinching(true)
-      const [controller1, controller2] = event.controllers
-      const dx = controller1.position.x - controller2.position.x
-      const dy = controller1.position.y - controller2.position.y
-      const dz = controller1.position.z - controller2.position.z
-      pinchStartDistance.current = Math.sqrt(dx * dx + dy * dy + dz * dz)
-    }
-  }
-
-  const handleSqueezeEnd = () => {
-    console.log("Squeeze End")
-    setIsPinching(false)
-    pinchStartDistance.current = null
-  }
-
+  // Handle drag movement
   const handleMove = (event: any) => {
-    if (isPinching && event.controllers?.length === 2) {
-      const [controller1, controller2] = event.controllers
-      const dx = controller1.position.x - controller2.position.x
-      const dy = controller1.position.y - controller2.position.y
-      const dz = controller1.position.z - controller2.position.z
-      const currentDistance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-
-      if (pinchStartDistance.current !== null) {
-        const scaleChange = currentDistance / pinchStartDistance.current
-        const newScale = Math.max(0.5, Math.min(2, scale * scaleChange))
-        setScale(newScale)
-        pinchStartDistance.current = currentDistance
-      }
-    } else if (isDragging && event.controller?.position) {
+    if (isDragging && event.controller?.position) {
       console.log("Controller Move:", event.controller.position)
       const controllerPos = event.controller.position
       const delta = {
@@ -102,6 +75,44 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
     }
   }
 
+  // Handle pinch start (for zooming)
+  const handleSqueezeStart = (event: any) => {
+    console.log("Squeeze Start:", event.controllers)
+    if (event.controllers?.length === 2) {
+      setIsPinching(true)
+      const [controller1, controller2] = event.controllers
+      const dx = controller1.position.x - controller2.position.x
+      const dy = controller1.position.y - controller2.position.y
+      const dz = controller1.position.z - controller2.position.z
+      pinchStartDistance.current = Math.sqrt(dx * dx + dy * dy + dz * dz)
+    }
+  }
+
+  // Handle pinch end
+  const handleSqueezeEnd = () => {
+    console.log("Squeeze End")
+    setIsPinching(false)
+    pinchStartDistance.current = null
+  }
+
+  // Handle pinch movement (for zooming)
+  const handleSqueezeMove = (event: any) => {
+    if (isPinching && event.controllers?.length === 2) {
+      const [controller1, controller2] = event.controllers
+      const dx = controller1.position.x - controller2.position.x
+      const dy = controller1.position.y - controller2.position.y
+      const dz = controller1.position.z - controller2.position.z
+      const currentDistance = Math.sqrt(dx * dx + dy * dy + dz * dz)
+
+      if (pinchStartDistance.current !== null) {
+        const scaleChange = currentDistance / pinchStartDistance.current
+        const newScale = Math.max(0.5, Math.min(2, scale * scaleChange)) // Limit scale between 0.5 and 2
+        setScale(newScale)
+        pinchStartDistance.current = currentDistance
+      }
+    }
+  }
+
   useEffect(() => {
     console.log("WallArt Updated - Position:", position, "Rotation:", rotation, "Scale:", scale)
   }, [position, rotation, scale])
@@ -115,6 +126,7 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
       onMove={handleMove}
       onSqueezeStart={handleSqueezeStart}
       onSqueezeEnd={handleSqueezeEnd}
+      onSqueeze={handleSqueezeMove}
     >
       <group
         ref={meshRef}
@@ -124,10 +136,12 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
         rotation={[rotation.x, rotation.y, rotation.z]}
         {...rest}
       >
+        {/* Frame plane */}
         <mesh position={[0, 0, -0.01]}>
           <planeGeometry args={[width * frameScale, height * frameScale]} />
           <meshStandardMaterial color="#333333" />
         </mesh>
+        {/* Image plane */}
         <mesh>
           <planeGeometry args={[width, height]} />
           <meshStandardMaterial map={texture} transparent={true} />
@@ -152,71 +166,32 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
     onRotationChange(newRotation)
   }
 
-  return <></>
+  return <></> // Empty for now, as per original code
 }
 
 export function App() {
   const [position, setPosition] = useState({ x: 0, y: 1, z: -2.5 })
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 })
-  const [arSupported, setArSupported] = useState(false)
 
-  // Check WebXR support
   useEffect(() => {
-    if (navigator.xr) {
-      navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
-        setArSupported(supported)
-        if (!supported) {
-          console.error("Immersive AR is not supported on this device/browser.")
-        }
-      }).catch((err) => {
-        console.error("Error checking WebXR support:", err)
-      })
-    } else {
-      console.error("WebXR API is not available.")
-    }
-  }, [])
-
-  // Ensure button visibility during XR session
-  useEffect(() => {
-    const button = document.querySelector('button[data-xr-ui]') as HTMLElement | null
-    if (button) {
-      button.style.transform = 'translateX(-50%) scale(1)'
-      button.style.display = 'block'
-      button.style.visibility = 'visible'
-    }
-  }, [arSupported])
-
-  // Reset button transform on XR session start/end
-  useEffect(() => {
-    const handleXRSession = () => {
-      const button = document.querySelector('button[data-xr-ui]') as HTMLElement | null
-      if (button) {
-        button.style.transform = 'translateX(-50%) scale(1)'
-        button.style.position = 'fixed'
-        button.style.zIndex = '1000'
-        button.style.display = 'block'
-        button.style.visibility = 'visible'
-      }
-    }
-
-    if (navigator.xr) {
-      navigator.xr.addEventListener('sessionstart', handleXRSession)
-      navigator.xr.addEventListener('sessionend', handleXRSession)
-    }
-
-    return () => {
-      if (navigator.xr) {
-        navigator.xr.removeEventListener('sessionstart', handleXRSession)
-        navigator.xr.removeEventListener('sessionend', handleXRSession)
-      }
-    }
-  }, [])
+    console.log("App State Updated - Position:", position, "Rotation:", rotation)
+  }, [position, rotation])
 
   return (
-    <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden" }}>
+    <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+      {/* Ensure ARButton is outside Canvas and has high z-index */}
+      <ARButton
+        className="ar-button"
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          left: "50%",
+          transform: "translateX施X-50%",
+          zIndex: 1000, // High z-index to stay above Canvas
+        }}
+      />
       <Canvas
         style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0 }}
-        camera={{ manual: true }}
       >
         <XR referenceSpace="local">
           <ambientLight intensity={0.5} />
@@ -231,48 +206,6 @@ export function App() {
           <Controllers />
         </XR>
       </Canvas>
-      {arSupported ? (
-        <ARButton
-          className="ar-button"
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 1000,
-            transformOrigin: "center",
-            display: "block",
-            visibility: "visible",
-            padding: "10px 20px",
-            background: "#000",
-            color: "#fff",
-            border: "none",
-            borderRadius: "5px",
-            fontSize: "16px",
-          }}
-        />
-      ) : (
-        <button
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 1000,
-            padding: "10px 20px",
-            background: "#000",
-            color: "#fff",
-            border: "none",
-            borderRadius: "5px",
-            fontSize: "16px",
-            display: "block",
-            visibility: "visible",
-          }}
-          onClick={() => alert("AR is not supported on this device/browser.")}
-        >
-          AR Not Supported
-        </button>
-      )}
       <ControlPanel
         position={position}
         rotation={rotation}
