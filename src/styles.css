@@ -1,29 +1,15 @@
-body {
-  margin: 0;
-  overflow: hidden;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.xr-ar-button {
+  background-color: #3b82f6; /* Tailwind's blue-500 */
+  color: white;
+  padding: 0.5rem 1rem; /* Tailwind's px-4 py-2 */
+  border-radius: 0.375rem; /* Tailwind's rounded */
+  transition: background-color 0.2s;
 }
 
-canvas {
-  width: 100vw;
-  height: 100vh;
-  display: block;
+.xr-ar-button:hover {
+  background-color: #2563eb; /* Tailwind's blue-600 */
 }
-
-button[data-xr-ui] {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 10px 20px;
-  background-color: #000;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-button[data-xr-ui]:hover {
-  background-color: #333;
-}
-

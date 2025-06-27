@@ -136,7 +136,9 @@ export function App() {
 
   return (
     <>
-      <ARButton />
+      <div className="fixed top-4 right-4 z-50">
+        <ARButton className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" />
+      </div>
       <Canvas>
         <XR referenceSpace="local">
           <ambientLight intensity={0.5} />
