@@ -14,10 +14,10 @@ canvas {
 }
 
 button[data-xr-ui] {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) scale(1) !important;
   padding: 10px 20px;
   background-color: #000;
   color: #fff;
@@ -25,10 +25,17 @@ button[data-xr-ui] {
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  z-index: 2000; /* Ensure button stays above Canvas */
-  transform-origin: center; /* Prevent scaling issues */
+  z-index: 1000 !important;
+  transform-origin: center;
+  will-change: transform;
+  pointer-events: auto;
 }
 
 button[data-xr-ui]:hover {
   background-color: #333;
+}
+
+html, body, #root, button[data-xr-ui] {
+  transform: none !important;
+  scale: 1 !important;
 }
