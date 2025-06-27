@@ -13,29 +13,31 @@ canvas {
   z-index: 0;
 }
 
-button[data-xr-ui] {
+button[data-xr-ui], .ar-button {
   position: fixed !important;
   bottom: 20px !important;
   left: 50% !important;
   transform: translateX(-50%) scale(1) !important;
-  padding: 10px 20px;
-  background-color: #000;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
+  padding: 10px 20px !important;
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
   z-index: 1000 !important;
-  transform-origin: center;
+  transform-origin: center !important;
   will-change: transform;
-  pointer-events: auto;
+  pointer-events: auto !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
-button[data-xr-ui]:hover {
-  background-color: #333;
+button[data-xr-ui]:hover, .ar-button:hover {
+  background-color: #333 !important;
 }
 
-html, body, #root, button[data-xr-ui] {
+html, body, #root, button[data-xr-ui], .ar-button {
   transform: none !important;
   scale: 1 !important;
 }

@@ -57,10 +57,8 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
     pinchStartDistance.current = null
   }
 
-  // Handle both dragging and pinching in onMove
   const handleMove = (event: any) => {
     if (isPinching && event.controllers?.length === 2) {
-      // Pinch-to-zoom (two controllers)
       const [controller1, controller2] = event.controllers
       const dx = controller1.position.x - controller2.position.x
       const dy = controller1.position.y - controller2.position.y
@@ -74,7 +72,6 @@ function WallArt({ position, rotation, imageUrl, onPositionChange, onRotationCha
         pinchStartDistance.current = currentDistance
       }
     } else if (isDragging && event.controller?.position) {
-      // Drag (single controller)
       console.log("Controller Move:", event.controller.position)
       const controllerPos = event.controller.position
       const delta = {
@@ -161,15 +158,35 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
 export function App() {
   const [position, setPosition] = useState({ x: 0, y: 1, z: -2.5 })
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 })
+  const [arSupported, setArSupported] = useState(false)
 
+  // Check WebXR support
   useEffect(() => {
-    console.log("App State Updated - Position:", position, "Rotation:", rotation)
+    if (navigator.xr) {
+      navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
+        setArSupported(supported)
+        if (!supported) {
+          console.error("Immersive AR is not supported on this device/browser.")
+        }
+      }).catch((err) => {
+        console.error("Error checking WebXR support:", err)
+      })
+    } else {
+      console.error("WebXR API is not available.")
+    }
+  }, [])
+
+  // Ensure button visibility during XR session
+  useEffect(() => {
     const button = document.querySelector('button[data-xr-ui]') as HTMLElement | null
     if (button) {
       button.style.transform = 'translateX(-50%) scale(1)'
+      button.style.display = 'block'
+      button.style.visibility = 'visible'
     }
-  }, [position, rotation])
+  }, [arSupported])
 
+  // Reset button transform on XR session start/end
   useEffect(() => {
     const handleXRSession = () => {
       const button = document.querySelector('button[data-xr-ui]') as HTMLElement | null
@@ -177,6 +194,8 @@ export function App() {
         button.style.transform = 'translateX(-50%) scale(1)'
         button.style.position = 'fixed'
         button.style.zIndex = '1000'
+        button.style.display = 'block'
+        button.style.visibility = 'visible'
       }
     }
 
@@ -212,18 +231,48 @@ export function App() {
           <Controllers />
         </XR>
       </Canvas>
-      <ARButton
-        className="ar-button"
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1000,
-          transformOrigin: "center",
-          scale: "1",
-        }}
-      />
+      {arSupported ? (
+        <ARButton
+          className="ar-button"
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            transformOrigin: "center",
+            display: "block",
+            visibility: "visible",
+            padding: "10px 20px",
+            background: "#000",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            fontSize: "16px",
+          }}
+        />
+      ) : (
+        <button
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            padding: "10px 20px",
+            background: "#000",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            fontSize: "16px",
+            display: "block",
+            visibility: "visible",
+          }}
+          onClick={() => alert("AR is not supported on this device/browser.")}
+        >
+          AR Not Supported
+        </button>
+      )}
       <ControlPanel
         position={position}
         rotation={rotation}
