@@ -197,18 +197,10 @@ export function App() {
   }, [position, rotation])
 
   return (
+    <>
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       {/* Ensure ARButton is outside Canvas and has high z-index */}
-      <ARButton
-        className="ar-button"
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          left: "50%",
-          transform: "translateX施X-50%",
-          zIndex: 1000, // High z-index to stay above Canvas
-        }}
-      />
+     
       <Canvas
         style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0 }}
       >
@@ -232,5 +224,18 @@ export function App() {
         onRotationChange={(newRot: { x: number; y: number; z: number }) => setRotation({ ...newRot })}
       />
     </div>
+    <div>
+       <ARButton
+        className="ar-button"
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          left: "50%",
+          transform: "translateX施X-50%",
+          zIndex: 1000, // High z-index to stay above Canvas
+        }}
+      />
+    </div>
+    </>
   )
 }
