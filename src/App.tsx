@@ -231,7 +231,7 @@ export function App() {
           position: "fixed",
           bottom: "20px",
           left: "50%",
-          transform: "translateX施X-50%",
+          transform: "translateX(-50%)",
           zIndex: 1000, // High z-index to stay above Canvas
         }}
       />
