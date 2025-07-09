@@ -172,6 +172,25 @@ function ControlPanel({ position, rotation, onPositionChange, onRotationChange }
 export function App() {
   const [position, setPosition] = useState({ x: 0, y: 1, z: -2.5 })
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 })
+  const [imageUrl, setImageUrl] = useState("/wall-art.png")
+
+  useEffect(() => {
+    // Extract imageUrl from query parameters
+    const params = new URLSearchParams(window.location.search)
+    const urlImage = params.get("imageUrl")
+    if (urlImage) {
+      try {
+        setImageUrl(urlImage)
+      } catch (error) {
+        console.error("Error decoding image URL:", error)
+        // Fallback to default image if decoding fails
+        setImageUrl("/wall-art.png")
+      }
+    } else {
+      console.warn("No imageUrl provided in query parameters, using default")
+    }
+  }, [])
+
 
   useEffect(() => {
     console.log("App State Updated - Position:", position, "Rotation:", rotation)
@@ -199,7 +218,7 @@ export function App() {
           <WallArt
             position={position}
             rotation={rotation}
-            imageUrl="/wall-art.png"
+            imageUrl={imageUrl}
             onPositionChange={(newPos: { x: number; y: number; z: number }) => setPosition({ ...newPos })}
             onRotationChange={(newRot: { x: number; y: number; z: number }) => setRotation({ ...newRot })}
           />
